@@ -16,9 +16,14 @@ class LoginViewController: UIViewController {
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
     
+    //MARK: - variable and constants
+    var ref: DatabaseReference!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        ref = Database.database().reference(withPath: "users")
         
         //Scroll keyboard
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardDidShow(notification:)), name: UIResponder.keyboardDidShowNotification, object: nil)
@@ -97,16 +102,17 @@ class LoginViewController: UIViewController {
             return
         }
         //firebase create user
-        Auth.auth().createUser(withEmail: email, password: password) { (user, error) in
-            if error == nil {
-                if user != nil {
-                    print("User is created")
-                } else {
-                    print("User is not created")
-                }
-            } else {
+        Auth.auth().createUser(withEmail: email, password: password) { [weak self] (user, error) in
+
+            guard error == nil, user != nil else {
                 print(error!.localizedDescription)
+                return
             }
+            
+            let userRef = self?.ref.child((user?.user.uid)!)
+            userRef?.setValue(["email": user?.user.email])
+            
+            
         }
     }
 }

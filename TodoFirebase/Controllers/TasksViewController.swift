@@ -11,6 +11,11 @@ import Firebase
 
 class TasksViewController: UIViewController {
 
+    //MARK: - variable and constants
+    var user: User!
+    var ref: DatabaseReference!
+    var tasks = Array<Task>()
+    
     //MARK: - Outlet
     @IBOutlet weak var tableView: UITableView!
     
@@ -18,13 +23,37 @@ class TasksViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        //take current user
+        guard let currentUser = Auth.auth().currentUser else { return }
+        
+        user = User(user: currentUser)
+        ref = Database.database().reference(withPath: "users").child(String(user.uid)).child("tasks")
+        
         
     }
     
     //MARK: - Actions
     @IBAction func addTapped(_ sender: Any) {
+        
+        //create alertCantroller
+        let alertController = UIAlertController(title: "New Task", message: "Add new task!", preferredStyle: .alert)
+        alertController.addTextField()
+        let save = UIAlertAction(title: "Save", style: .default) { [weak self]_ in
+            guard let textField = alertController.textFields?.first, textField.text != "" else { return }
+            
+            //create task
+            let task = Task(title: textField.text!, userId: (self?.user.uid)!)
+            let taskRef = self?.ref.child(task.title.lowercased())
+            taskRef?.setValue(task.convertToDictionary())
+        }
+        
+        let cancel = UIAlertAction(title: "Cancel", style: .default, handler: nil)
+        alertController.addAction(save)
+        alertController.addAction(cancel)
+        
+        present(alertController, animated: true, completion: nil)
     }
-    
+
     //exit
     @IBAction func signOutTapped(_ sender: Any) {
         //exit from profile
