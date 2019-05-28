@@ -83,24 +83,57 @@ class TasksViewController: UIViewController {
         dismiss(animated: true, completion: nil)
     }
     
-}
-//extension UITableView
-extension TasksViewController: UITableViewDelegate, UITableViewDataSource {
+    //add checkmark
+    func toggleCompletion(_ cell: UITableViewCell, iscompeted: Bool) {
+        cell.accessoryType = iscompeted ? .checkmark : .none
+    }
     
+    
+}
+//MARK: - extension UITableView
+extension TasksViewController: UITableViewDelegate, UITableViewDataSource {
+    //UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return tasks.count
         
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.backgroundColor = UIColor.clear
+        let task = tasks[indexPath.row]
+        let taskTitle = task.title
+        let isCompleted = task.completed
+        cell.textLabel?.text = taskTitle
         cell.textLabel?.textColor = UIColor.white
         
-        let taskTitle = tasks[indexPath.row].title
-        cell.textLabel?.text = taskTitle
         
+        toggleCompletion(cell, iscompeted: isCompleted)
         return cell
+    }
+    
+    //add delete button to cell
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let task = tasks[indexPath.row]
+            task.ref?.removeValue()
+        }
+    }
+    
+    //add checkmark
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let cell = tableView.cellForRow(at: indexPath) else { return }
+        let task = tasks[indexPath.row]
+        let isCompleted = !task.completed
+        
+        toggleCompletion(cell, iscompeted: isCompleted)
+        task.ref?.updateChildValues(["completed": isCompleted])
+        
     }
     
     
