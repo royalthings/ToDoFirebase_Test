@@ -7,26 +7,37 @@
 //
 
 import UIKit
+import Firebase
 
 class TasksViewController: UIViewController {
 
-    
+    //MARK: - Outlet
     @IBOutlet weak var tableView: UITableView!
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
+        
     }
     
-    
+    //MARK: - Actions
     @IBAction func addTapped(_ sender: Any) {
     }
     
-
+    //exit
+    @IBAction func signOutTapped(_ sender: Any) {
+        //exit from profile
+        do {
+            try Auth.auth().signOut()
+        } catch {
+            print(error.localizedDescription)
+        }
+        dismiss(animated: true, completion: nil)
+    }
+    
 }
-
+//extension UITableView
 extension TasksViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
